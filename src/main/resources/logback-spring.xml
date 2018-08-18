@@ -1,0 +1,14 @@
+<configuration debug="false">
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
+    <property resource="logback/logback.properties"/>
+
+    <include resource="logback/console.xml"/>
+    <include resource="logback/file.xml"/>
+
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <logger name="org.springframework" level="info"/>
+    <logger name="com.maycur" level="debug"/>
+</configuration>

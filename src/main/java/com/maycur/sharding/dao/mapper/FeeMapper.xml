@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maycur.sharding.dao.mapper.FeeMapper">
+    <insert id="insert">
+        insert into t_fee (ent_code, fee_code, fee_amount, user_code, reimburse_data_code)
+        values (#{fee.entCode,javaType=String,jdbcType=VARCHAR},
+                #{fee.feeCode,javaType=String,jdbcType=VARCHAR},
+                #{fee.feeAmount,javaType=java.math.BigDecimal,jdbcType=NUMERIC},
+                #{fee.userCode,javaType=String,jdbcType=VARCHAR},
+                #{fee.reimburseDataCode,javaType=String,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="selectAllByEntCode" resultType="com.maycur.sharding.entity.Fee">
+        select ent_code            as entCode,
+               fee_code            as feeCode,
+               fee_amount          as feeAmount,
+               user_code           as userCode,
+               reimburse_data_code as reimburseDataCode
+        from t_fee
+        where ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectOne" resultType="com.maycur.sharding.entity.Fee">
+        select ent_code            as entCode,
+               fee_code            as feeCode,
+               fee_amount          as feeAmount,
+               user_code           as userCode,
+               reimburse_data_code as reimburseDataCode
+        from t_fee
+        where ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+          and fee_code = #{feeCode,javaType=String,jdbcType=VARCHAR}
+    </select>
+
+    <delete id="delete">
+        delete
+        from t_fee
+        where ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+          and fee_code = #{feeCode,javaType=String,jdbcType=VARCHAR}
+    </delete>
+
+    <update id="update">
+        update t_fee
+        set fee_amount = #{fee.feeAmount,javaType=java.math.BigDecimal,jdbcType=NUMERIC},
+            user_code  = #{fee.userCode,javaType=String,jdbcType=VARCHAR}
+        where ent_code = #{fee.entCode,javaType=String,jdbcType=VARCHAR}
+          and fee_code = #{fee.feeCode,javaType=String,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectSomeByEntCode" resultType="com.maycur.sharding.entity.Fee">
+        select ent_code as entCode,
+        fee_code as feeCode,
+        fee_amount as feeAmount,
+        user_code as userCode,
+        reimburse_data_code as reimburseDataCode
+        from t_fee
+        where ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+        and fee_code in
+        <foreach collection="feeCodes" open="(" close=")" separator="," item="feeCode">
+            #{feeCode,javaType=String,jdbcType=VARCHAR}
+        </foreach>
+    </select>
+
+    <select id="selectByEntCodes" resultType="com.maycur.sharding.entity.Fee">
+        select ent_code as entCode,
+        fee_code as feeCode,
+        fee_amount as feeAmount,
+        user_code as userCode,
+        reimburse_data_code as reimburseDataCode
+        from t_fee
+        where ent_code in
+        <foreach collection="entCodes" open="(" close=")" separator="," item="entCode">
+            #{entCode,javaType=String,jdbcType=VARCHAR}
+        </foreach>
+        order by fee_amount limit 1
+    </select>
+
+    <select id="selectFeeWithAllocation" resultType="com.maycur.sharding.entity.FeeAllocation">
+        select fee.ent_code                   as entCode,
+               fee.fee_code                   as feeCode,
+               fee.fee_amount                 as feeAmount,
+               fee.user_code                  as userCode,
+               fee.reimburse_data_code        as reimburseDataCode,
+               allocation.fee_allocation_code as feeAllocationCode,
+               allocation.amount              as amount
+        from t_fee fee
+                 join t_fee_allocation allocation
+                     on allocation.fee_code = fee.fee_code and allocation.ent_code = fee.ent_code
+        where fee.ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectReimburseFeeWithAllocation" resultType="com.maycur.sharding.entity.FeeAllocation">
+        select fee.ent_code                   as entCode,
+               fee.fee_code                   as feeCode,
+               fee.fee_amount                 as feeAmount,
+               fee.user_code                  as userCode,
+               fee.reimburse_data_code        as reimburseDataCode,
+               allocation.fee_allocation_code as feeAllocationCode,
+               allocation.amount              as amount
+        from t_reimburse reim
+                 join t_fee fee on fee.ent_code = reim.ent_code and reim.reimburse_data_code = fee.reimburse_data_code
+                 join t_fee_allocation allocation
+                     on allocation.fee_code = fee.fee_code and allocation.ent_code = fee.ent_code
+        where fee.ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="batchInsert">
+        insert into t_fee (ent_code, fee_code, fee_amount, user_code, reimburse_data_code)
+        values
+        <foreach collection="fees" item="fee" separator=",">
+            (#{fee.entCode,javaType=String,jdbcType=VARCHAR},
+            #{fee.feeCode,javaType=String,jdbcType=VARCHAR},
+            #{fee.feeAmount,javaType=java.math.BigDecimal,jdbcType=NUMERIC},
+            #{fee.userCode,javaType=String,jdbcType=VARCHAR},
+            #{fee.reimburseDataCode,javaType=String,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+</mapper>

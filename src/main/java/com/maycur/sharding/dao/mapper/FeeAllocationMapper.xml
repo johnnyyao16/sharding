@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.maycur.sharding.dao.mapper.FeeAllocationMapper">
+    <insert id="insert">
+        insert into t_fee_allocation (ent_code, fee_code, amount, fee_allocation_code)
+        values (#{allocation.entCode,javaType=String,jdbcType=VARCHAR},
+                #{allocation.feeCode,javaType=String,jdbcType=VARCHAR},
+                #{allocation.amount,javaType=java.math.BigDecimal,jdbcType=NUMERIC},
+                #{allocation.feeAllocationCode,javaType=String,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="selectAllByEntCode" resultType="com.maycur.sharding.entity.FeeAllocation">
+        select amount as amount, fee_allocation_code as feeAllocationCode
+        from t_fee_allocation
+        where ent_code = #{entCode,javaType=String,jdbcType=VARCHAR}
+          and fee_code = #{feeCode,javaType=String,jdbcType=VARCHAR}
+    </select>
+</mapper>
